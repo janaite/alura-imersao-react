@@ -20,9 +20,74 @@ function ProfileSidebar(props) {
   )
 }
 
+function JJProfileRelationBox(propriedades) {
+  return (
+    <ProfileRelationsBoxWrapper>
+      <h2 className="smallTitle">
+        {propriedades.title} ({propriedades.items.length})
+      </h2>
+      <ul>
+        {propriedades.items.slice(0, 6).map((itemAtual) => {
+          return (
+            <li key={itemAtual.id}>
+              <a href={itemAtual.link_url} key={itemAtual}>
+                <img src={itemAtual.img_url} />
+                <span>{itemAtual.caption}</span>
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </ProfileRelationsBoxWrapper>
+  )
+}
+
+function ProfileFollowers(props) {
+  return (
+    <JJProfileRelationBox title={props.title} items={props.items.map(
+      function (s) {
+        return {
+          id: s.id,
+          link_url: `https://github.com/${s.login}`,
+          img_url: `https://github.com/${s.login}.png`,
+          caption: s.login
+        }
+      })}
+    />
+  )
+}
+
+function ProfileCommunities(props) {
+  return (
+    <JJProfileRelationBox title={props.title} items={props.items.map(
+      function (c) {
+        return {
+          id: c.id,
+          link_url: 'http://www.google.com',
+          img_url: c.image,
+          caption: c.title
+        }
+      })}
+    />
+  )
+}
+
+function ProfileCommunityPeople(props) {
+  return (
+    <JJProfileRelationBox title={props.title} items={props.items.map(
+      function (s) {
+        return {
+          id: s,
+          link_url: `https://github.com/${s}`,
+          img_url: `https://github.com/${s}.png`,
+          caption: s
+        }
+      }
+    )} />
+  )
+}
+
 export default function Home() {
-
-
   const githubUser = 'janaite';
   const [comunidades, setComunidades] = React.useState([{
     id: 12313131313,
@@ -38,6 +103,18 @@ export default function Home() {
     'marcobrunodev',
     'rafaballerini'
   ]
+
+  const [seguidores, setSeguidores] = React.useState([]);
+
+  React.useEffect(function () {
+    fetch('https://api.github.com/users/janaite/followers')
+      .then(function (respostaDoServidor) {
+        return respostaDoServidor.json();
+      })
+      .then(function (respostaCompleta) {
+        setSeguidores(respostaCompleta);
+      })
+  }, []) // empty array means run once
 
   return (
     <>
@@ -93,41 +170,9 @@ export default function Home() {
         </div>
 
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Comunidades ({comunidades.length})
-            </h2>
-            <ul>
-              {comunidades.map((itemAtual) => {
-                return (
-                  <li key={itemAtual.id}>
-                    <a href={`/users/${itemAtual.title}`} key={itemAtual}>
-                      <img src={itemAtual.image} />
-                      <span>{itemAtual.title}</span>
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
-
-          <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Pessoas da Comunidade ({pessoasFavoritas.length})
-            </h2>
-            <ul>
-              {pessoasFavoritas.map((itemAtual) => {
-                return (
-                  <li key={itemAtual}>
-                    <a href={`/users/${itemAtual}`} key={itemAtual}>
-                      <img src={`https://github.com/${itemAtual}.png`} />
-                      <span>{itemAtual}</span>
-                    </a>
-                  </li>
-                )
-              })}
-            </ul>
-          </ProfileRelationsBoxWrapper>
+          <ProfileFollowers title="Seguidores" items={seguidores} />
+          <ProfileCommunities title="Comunidades" items={comunidades} />
+          <ProfileCommunityPeople title="Pessoas da Comunidade" items={pessoasFavoritas} />
         </div>
       </MainGrid>
     </>
